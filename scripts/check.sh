@@ -22,7 +22,16 @@ for type in movie series; do
   done
 done
 
-cc=$(curl -fsSI "$BASE/catalog/movie/in-ml.json" | tr -d '\r' | awk -F': ' 'tolower($1)=="cache-control"{print $2}')
-[[ "$cc" == *s-maxage=21600* ]] && ok "catalog Cache-Control: $cc" || bad "catalog Cache-Control: '$cc'"
+# Vercel strips s-maxage before responding, so prove CDN caching by a HIT on a repeat request.
+url="$BASE/catalog/movie/in-ml.json"
+curl -fsS -o /dev/null "$url"
+hdrs=$(curl -fsSI "$url" | tr -d '\r' | tr 'A-Z' 'a-z')
+cc=$(awk -F': ' '$1=="cache-control"{print $2}' <<<"$hdrs")
+hit=$(awk -F': ' '$1=="x-vercel-cache"{print $2}' <<<"$hdrs")
+if [ -z "$hit" ]; then
+  [[ "$cc" == *s-maxage=21600* ]] && ok "catalog Cache-Control (local): $cc" || bad "catalog Cache-Control: '$cc'"
+else
+  [[ "$hit" == hit || "$hit" == stale ]] && ok "CDN cache on repeat request: $hit" || bad "CDN cache on repeat request: $hit"
+fi
 
 exit $fail
