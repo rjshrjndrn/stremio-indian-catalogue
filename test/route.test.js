@@ -27,6 +27,10 @@ test('unknown language, type or path -> null', () => {
   assert.equal(parseRoute('/meta/movie/tt1.json'), null)
 })
 
+test('malformed percent-encoding -> null, not a crash', () => {
+  assert.equal(parseRoute('/catalog/movie/in-ml/skip%E0%A4.json'), null)
+})
+
 test('garbage skip falls back to 0', () => {
   assert.equal(parseRoute('/catalog/movie/in-ml/skip=abc.json').skip, 0)
 })

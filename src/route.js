@@ -2,7 +2,8 @@ import { LANGS, TYPES } from './manifest.js'
 
 // Stremio paths: /manifest.json, /catalog/{type}/{id}.json, /catalog/{type}/{id}/{extra}.json
 export function parseRoute(url) {
-  const path = decodeURIComponent(url.split('?')[0])
+  let path
+  try { path = decodeURIComponent(url.split('?')[0]) } catch { return null }
   if (path === '/manifest.json') return { kind: 'manifest' }
   const m = path.match(/^\/catalog\/([^/]+)\/in-([^/]+?)(?:\/([^/]+))?\.json$/)
   if (!m || !TYPES.includes(m[1]) || !(m[2] in LANGS)) return null
