@@ -22,7 +22,8 @@ export function createTmdb({ key, fetch = globalThis.fetch, today = () => new Da
     const data = await get(`/discover/${tv ? 'tv' : 'movie'}`, { with_original_language: lang, page: p, ...params })
     const ids = await Promise.all(data.results.map((r) =>
       get(`/${tv ? 'tv' : 'movie'}/${r.id}/external_ids`).then((x) => x.imdb_id, () => null)))
-    const items = data.results.flatMap((r, i) => (ids[i] ? [toMeta(type, r, ids[i])] : []))
+    // No IMDb id: keep as tmdb:<id> so pages stay 20 long (stream addons may find nothing).
+    const items = data.results.map((r, i) => toMeta(type, r, ids[i] ?? `tmdb:${r.id}`))
     return { items, totalPages: data.total_pages ?? 1 }
   }
 

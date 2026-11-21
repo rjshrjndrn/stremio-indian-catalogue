@@ -1,15 +1,11 @@
-// Maps a Stremio `skip` offset onto TMDB pages whose items were filtered
-// (titles without IMDb ids dropped), so page sizes vary. Returns the rest of
-// the page containing `skip`; the client's nextSkip = skip + items.length then
-// lands exactly on the next page boundary. Empty pages are skipped because an
-// empty response makes clients stop paging.
-// fetchPage(p) -> { items, totalPages }, p is 1-based.
+// TMDB discover pages are a fixed 20 items (no filtering on our side), so a
+// Stremio `skip` maps straight to one page: one TMDB fetch per request however
+// deep the user scrolls. Returning the rest of that page keeps the client's
+// nextSkip = skip + items.length on page boundaries.
+export const PAGE_SIZE = 20
+
+// fetchPage(p) -> { items }, p is 1-based.
 export async function pageAt(fetchPage, skip = 0) {
-  let offset = skip
-  for (let p = 1; ; p++) {
-    const { items, totalPages } = await fetchPage(p)
-    if (offset < items.length) return items.slice(offset)
-    offset -= items.length
-    if (p >= totalPages) return []
-  }
+  const { items } = await fetchPage(Math.floor(skip / PAGE_SIZE) + 1)
+  return items.slice(skip % PAGE_SIZE)
 }

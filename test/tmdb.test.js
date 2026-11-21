@@ -23,20 +23,21 @@ function fakeFetch(log) {
   }
 }
 
-test('movie page: discover params, tt filter, meta mapping', async () => {
+test('movie page: discover params, imdb ids with tmdb fallback, meta mapping', async () => {
   const log = []
   const tmdb = createTmdb({ key: 'k'.repeat(32), fetch: fakeFetch(log), today: () => '2026-11-21' })
   const { items, totalPages } = await tmdb.page('movie', 'ml', 2)
 
   assert.equal(totalPages, 7)
-  assert.deepEqual(items.map((m) => m.id), ['tt0000001', 'tt0000003'])
+  // Title 2 has no IMDb id: kept with a tmdb: id so pages stay 20 long.
+  assert.deepEqual(items.map((m) => m.id), ['tt0000001', 'tmdb:2', 'tt0000003'])
   assert.deepEqual(items[0], {
     id: 'tt0000001', type: 'movie', name: 'A',
     poster: 'https://image.tmdb.org/t/p/w342/a.jpg',
     background: 'https://image.tmdb.org/t/p/w1280/ab.jpg',
     description: 'oa', releaseInfo: '2026',
   })
-  assert.equal(items[1].poster, undefined)
+  assert.equal(items[2].poster, undefined)
 
   const d = log[0]
   assert.equal(d.pathname, '/3/discover/movie')
