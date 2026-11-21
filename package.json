@@ -1,0 +1,12 @@
+{
+  "name": "stremio-indian-catalogue",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Stremio/Nuvio catalog addon: latest Malayalam, Tamil, Marathi, Hindi movies and series from TMDB, IMDb ids only",
+  "scripts": {
+    "test": "node --test",
+    "dev": "node --env-file-if-exists=.env.local scripts/dev.js"
+  },
+  "license": "MIT"
+}
