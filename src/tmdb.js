@@ -1,5 +1,8 @@
 const API = 'https://api.themoviedb.org/3'
 const IMG = 'https://image.tmdb.org/t/p'
+const TRENDING_DAYS = 90
+
+const daysBefore = (iso, n) => new Date(Date.parse(iso) - n * 864e5).toISOString().slice(0, 10)
 
 export function createTmdb({ key, fetch = globalThis.fetch, today = () => new Date().toISOString().slice(0, 10) }) {
   // v4 read-access tokens are JWTs; v3 keys are 32 hex chars.
@@ -15,10 +18,13 @@ export function createTmdb({ key, fetch = globalThis.fetch, today = () => new Da
 
   async function page(type, lang, p) {
     const tv = type === 'series'
+    const to = today()
+    const from = daysBefore(to, TRENDING_DAYS)
+    // Trending = most popular among recent titles. TMDB /trending has no language filter.
     const params = tv
-      ? { sort_by: 'first_air_date.desc', 'first_air_date.lte': today() }
+      ? { sort_by: 'popularity.desc', 'air_date.gte': from, 'air_date.lte': to }
       // Digital (OTT) release in India, so streams likely exist.
-      : { sort_by: 'primary_release_date.desc', region: 'IN', with_release_type: '4', 'release_date.lte': today() }
+      : { sort_by: 'popularity.desc', region: 'IN', with_release_type: '4', 'release_date.gte': from, 'release_date.lte': to }
     const data = await get(`/discover/${tv ? 'tv' : 'movie'}`, { with_original_language: lang, page: p, ...params })
     const ids = await Promise.all(data.results.map((r) =>
       get(`/${tv ? 'tv' : 'movie'}/${r.id}/external_ids`).then((x) => x.imdb_id, () => null)))

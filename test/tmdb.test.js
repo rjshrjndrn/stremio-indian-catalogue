@@ -44,13 +44,16 @@ test('movie page: discover params, imdb ids with tmdb fallback, meta mapping', a
   assert.equal(d.searchParams.get('with_original_language'), 'ml')
   assert.equal(d.searchParams.get('region'), 'IN')
   assert.equal(d.searchParams.get('with_release_type'), '4')
+  // Trending: most popular first, released (digitally, in India) in the last 90 days.
+  assert.equal(d.searchParams.get('sort_by'), 'popularity.desc')
+  assert.equal(d.searchParams.get('release_date.gte'), '2026-08-23')
   assert.equal(d.searchParams.get('release_date.lte'), '2026-11-21')
   assert.equal(d.searchParams.get('page'), '2')
   assert.equal(d.searchParams.get('api_key'), 'k'.repeat(32))
   assert.ok(log.slice(1).every((u) => /^\/3\/movie\/\d+\/external_ids$/.test(u.pathname)))
 })
 
-test('series page uses discover/tv and first_air_date', async () => {
+test('series page: discover/tv, popular shows with an episode aired in last 90 days', async () => {
   const log = []
   const tmdb = createTmdb({ key: 'k'.repeat(32), fetch: fakeFetch(log), today: () => '2026-11-21' })
   const { items } = await tmdb.page('series', 'ta', 1)
@@ -58,8 +61,9 @@ test('series page uses discover/tv and first_air_date', async () => {
   assert.equal(items[0].type, 'series')
   assert.equal(items[0].releaseInfo, '2025')
   assert.equal(log[0].pathname, '/3/discover/tv')
-  assert.equal(log[0].searchParams.get('sort_by'), 'first_air_date.desc')
-  assert.equal(log[0].searchParams.get('first_air_date.lte'), '2026-11-21')
+  assert.equal(log[0].searchParams.get('sort_by'), 'popularity.desc')
+  assert.equal(log[0].searchParams.get('air_date.gte'), '2026-08-23')
+  assert.equal(log[0].searchParams.get('air_date.lte'), '2026-11-21')
   assert.ok(log.slice(1).every((u) => /^\/3\/tv\/\d+\/external_ids$/.test(u.pathname)))
 })
 

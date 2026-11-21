@@ -11,7 +11,10 @@ test('manifest: 200 JSON with CORS and 8 catalogs', async () => {
   assert.equal(r.status, 200)
   assert.equal(r.headers['Content-Type'], 'application/json; charset=utf-8')
   assert.equal(r.headers['Access-Control-Allow-Origin'], '*')
-  assert.equal(JSON.parse(r.body).catalogs.length, 8)
+  const { catalogs } = JSON.parse(r.body)
+  assert.equal(catalogs.length, 8)
+  // Ids unchanged so existing installs keep working; names say what the row is.
+  assert.deepEqual(catalogs[0], { type: 'movie', id: 'in-ml', name: 'Malayalam Trending', extra: [{ name: 'skip' }] })
 })
 
 test('catalog: metas from the TMDB page that skip points at, CDN-cached', async () => {

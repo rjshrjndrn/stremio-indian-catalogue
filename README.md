@@ -1,9 +1,10 @@
 # Stremio Indian Catalogue
 
-Catalog addon for [Stremio](https://www.stremio.com) and [Nuvio](https://nuvio.wiki): the latest **Malayalam, Tamil, Marathi and Hindi** movies and series, from TMDB.
+Catalog addon for [Stremio](https://www.stremio.com) and [Nuvio](https://nuvio.wiki): **trending Malayalam, Tamil, Marathi and Hindi** movies and series, from TMDB.
 
-- 8 rows: each language × movies / series, newest first, endless scroll
-- Movies: only titles with a **digital (OTT) release in India**, so streams are likely to exist
+- 8 rows: each language × movies / series, most popular first, endless scroll
+- Movies: **digital (OTT) release in India in the last 90 days**, so streams are likely to exist
+- Series: an episode aired in the last 90 days (currently running or just finished)
 - IMDb ids (`tt…`) wherever TMDB has one, so stream addons like Torrentio can find streams
 - Catalog only: no streams, no metadata pages (your other addons handle those)
 
@@ -41,7 +42,8 @@ Nuvio on the same Mac can install `http://localhost:3000/manifest.json` directly
 ```
 Nuvio ── /catalog/movie/in-ml/skip=40.json ──▶ Vercel CDN (6h cache) ──miss──▶ api/index.js
                                                                                  │
-     TMDB /discover/movie?with_original_language=ml&region=IN&with_release_type=4&page=3
+     TMDB /discover/movie?with_original_language=ml&sort_by=popularity.desc
+                         &region=IN&with_release_type=4&release_date.gte=<90d ago>&page=3
      TMDB /movie/{id}/external_ids  ×20  → imdb_id (tt…), else tmdb:{id}
                                                                                  │
 Nuvio ◀── { metas: [{ id: "tt…", name, poster, … }] } ◀──────────────────────────┘
